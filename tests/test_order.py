@@ -9,61 +9,74 @@ from helpers.test_data import ORDER_DATA_1, ORDER_DATA_2
 class TestOrderScooter:
     """Тесты для проверки оформления заказа самоката"""
 
-    @allure.title("Заказ самоката через кнопку '{button_location}' с данными: {order_data[first_name]} {order_data[last_name]}")
-    @allure.description("Проверяем полный флоу оформления заказа с проверкой успешного создания")
-    @pytest.mark.parametrize("button_location,order_data", [
-        ("верхняя", ORDER_DATA_1),
-        ("нижняя", ORDER_DATA_2)
-    ])
-    def test_order_scooter_full_flow(self, driver, button_location, order_data):
-        """
-        Тест полного флоу оформления заказа:
-        1. Клик на кнопку 'Заказать' (верхняя или нижняя)
-        2. Заполнение формы 'Для кого самокат'
-        3. Переход к форме 'Про аренду'
-        4. Заполнение формы 'Про аренду'
-        5. Подтверждение заказа
-        6. Проверка сообщения об успешном создании заказа
-        """
+    @allure.title("Заказ самоката через верхнюю кнопку")
+    @allure.description("Проверяем полный флоу оформления заказа через верхнюю кнопку 'Заказать'")
+    def test_order_scooter_top_button(self, driver):
+        """Тест оформления заказа через верхнюю кнопку 'Заказать'"""
         main_page = MainPage(driver)
         order_page = OrderPage(driver)
 
-        # Шаг 1: Клик на кнопку "Заказать"
-        if button_location == "верхняя":
-            main_page.click_order_button_top()
-        else:
-            main_page.click_order_button_bottom()
+        main_page.click_order_button_top()
 
-        # Шаг 2: Заполнить форму "Для кого самокат"
         order_page.fill_customer_form(
-            first_name=order_data["first_name"],
-            last_name=order_data["last_name"],
-            address=order_data["address"],
-            metro_station=order_data["metro_station"],
-            phone=order_data["phone"]
+            first_name=ORDER_DATA_1["first_name"],
+            last_name=ORDER_DATA_1["last_name"],
+            address=ORDER_DATA_1["address"],
+            metro_station=ORDER_DATA_1["metro_station"],
+            phone=ORDER_DATA_1["phone"]
         )
 
-        # Шаг 3: Клик на кнопку "Далее"
         order_page.click_next_button()
 
-        # Шаг 4: Заполнить форму "Про аренду"
-        order_page.fill_rental_form(
-            delivery_date=order_data["delivery_date"],
-            rental_period=order_data["rental_period"],
-            color=order_data["color"],
-            comment=order_data["comment"]
-        )
+        order_page.input_delivery_date(ORDER_DATA_1["delivery_date"])
+        order_page.select_rental_period(ORDER_DATA_1["rental_period"])
+        order_page.select_color(ORDER_DATA_1["color"])
+        order_page.input_comment(ORDER_DATA_1["comment"])
 
-        # Шаг 5: Клик на кнопку "Заказать"
         order_page.click_order_button()
-
-        # Шаг 6: Подтверждение заказа
         order_page.confirm_order()
 
-        # Шаг 7: Проверка успешного создания заказа
-        assert order_page.is_success_message_displayed(), \
-            "Сообщение об успешном создании заказа не отображается"
-
+        # Собираем данные до проверок
+        is_message_displayed = order_page.is_success_message_displayed()
         success_text = order_page.get_success_message_text()
+
+        # Проверки
+        assert is_message_displayed, "Сообщение об успешном создании заказа не отображается"
+        assert "Заказ оформлен" in success_text, \
+            f"Текст сообщения не содержит 'Заказ оформлен'. Получено: '{success_text}'"
+
+    @allure.title("Заказ самоката через нижнюю кнопку")
+    @allure.description("Проверяем полный флоу оформления заказа через нижнюю кнопку 'Заказать'")
+    def test_order_scooter_bottom_button(self, driver):
+        """Тест оформления заказа через нижнюю кнопку 'Заказать'"""
+        main_page = MainPage(driver)
+        order_page = OrderPage(driver)
+
+        main_page.click_order_button_bottom()
+
+        order_page.fill_customer_form(
+            first_name=ORDER_DATA_2["first_name"],
+            last_name=ORDER_DATA_2["last_name"],
+            address=ORDER_DATA_2["address"],
+            metro_station=ORDER_DATA_2["metro_station"],
+            phone=ORDER_DATA_2["phone"]
+        )
+
+        order_page.click_next_button()
+
+        order_page.input_delivery_date(ORDER_DATA_2["delivery_date"])
+        order_page.select_rental_period(ORDER_DATA_2["rental_period"])
+        order_page.select_color(ORDER_DATA_2["color"])
+        order_page.input_comment(ORDER_DATA_2["comment"])
+
+        order_page.click_order_button()
+        order_page.confirm_order()
+
+        # Собираем данные до проверок
+        is_message_displayed = order_page.is_success_message_displayed()
+        success_text = order_page.get_success_message_text()
+
+        # Проверки
+        assert is_message_displayed, "Сообщение об успешном создании заказа не отображается"
         assert "Заказ оформлен" in success_text, \
             f"Текст сообщения не содержит 'Заказ оформлен'. Получено: '{success_text}'"

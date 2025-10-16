@@ -21,22 +21,17 @@ class TestFAQSection:
         (7, FAQ_EXPECTED_ANSWERS[7])
     ])
     def test_faq_question_answer(self, driver, question_index, expected_answer):
-        """
-        Тест проверяет раскрытие вопроса и соответствие текста ответа
-        """
+        """Тест проверяет раскрытие вопроса и соответствие текста ответа"""
         main_page = MainPage(driver)
         
-        # Прокрутить до раздела FAQ
         main_page.scroll_to_faq_section()
-        
-        # Кликнуть на вопрос
         main_page.click_faq_question(question_index)
         
-        # Проверить, что ответ отображается
-        assert main_page.is_faq_answer_visible(question_index), \
-            f"Ответ на вопрос {question_index} не отображается"
-        
-        # Проверить текст ответа
+        # Собираем все данные до проверок
+        is_answer_visible = main_page.is_faq_answer_visible(question_index)
         actual_answer = main_page.get_faq_answer_text(question_index)
+        
+        # Проверки
+        assert is_answer_visible, f"Ответ на вопрос {question_index} не отображается"
         assert expected_answer in actual_answer, \
             f"Текст ответа не соответствует ожидаемому. Ожидалось: '{expected_answer}', получено: '{actual_answer}'"
